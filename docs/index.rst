@@ -1,10 +1,10 @@
-pyramid_restler
+pyramid_resourceful
 +++++++++++++++
 
 Overview
 ========
 
-`pyramid_restler` is a somewhat-opinionated toolkit for building
+`pyramid_resourceful` is a somewhat-opinionated toolkit for building
 resourceful Web services and applications on top of the Pyramid
 framework.
 
@@ -30,7 +30,7 @@ Views
 =====
 
 Resource views are implemented as a standard set of HTTP methods in view
-classes. See :class:`pyramid_restler.view.ResourceView` as an example.
+classes. See :class:`pyramid_resourceful.view.ResourceView` as an example.
 
 Resources
 =========
@@ -38,8 +38,8 @@ Resources
 Resource views interact with a resource. A common example of such a
 resource is a database table that's mapped to a SQLAlchemy ORM class.
 
-:class:`pyramid_restler.sqlalchemy.SQLAlchemyContainerResource` and
-:class:`pyramid_restler.sqlalchemy.SQLAlchemyItemResource` classes are
+:class:`pyramid_resourceful.sqlalchemy.SQLAlchemyContainerResource` and
+:class:`pyramid_resourceful.sqlalchemy.SQLAlchemyItemResource` classes are
 provided as a starting point.
 
 The purpose of the resource layer is to provide a uniform interface to

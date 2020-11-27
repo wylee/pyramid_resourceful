@@ -160,7 +160,7 @@ def add_resource(
         view_args: Common view args that will be passed to *every* call
             to ``config.add_view()``.
 
-    Settings can be set under the "pyramid_restler" key:
+    Settings can be set under the "pyramid_resourceful" key:
 
     - default_acl: Default ACL to attach to resource classes that
       don't have an __acl__ attribute (when ``acl`` isn't specified).

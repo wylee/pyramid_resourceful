@@ -5,8 +5,8 @@ top_level = os.path.dirname(here)
 
 # -- General configuration -----------------------------------------------------
 
-project = "pyramid_restler"
-version = "2.0a1"  # Short version
+project = "pyramid_resourceful"
+version = "1.0a1"  # Short version
 release = version  # Full version
 author_name = "Wyatt Baldwin"
 author_email = "self@wyattbaldwin.com"
@@ -89,7 +89,7 @@ latex_documents = [
     (
         "index",
         f"{project}.tex",
-        "pyramid\\_restler Documentation",
+        "pyramid\\_resourceful Documentation",
         author_name,
         "manual",
     ),

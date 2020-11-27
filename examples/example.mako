@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>pyramid_restler Example</title>
+    <title>pyramid_resourceful Example</title>
     <style>
       html {
         box-sizing: border-box;

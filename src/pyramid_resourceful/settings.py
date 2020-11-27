@@ -39,7 +39,7 @@ Used to determine how to convert settings values.
 
 
 def get_setting(all_settings, name, default=NOT_SET):
-    """Get pyramid_restler setting from config.
+    """Get pyramid_resourceful setting from config.
 
     If the setting wasn't set in the app, the passed ``default`` value
     will be used. If a ``default`` value wasn't passed, the default from
@@ -47,8 +47,8 @@ def get_setting(all_settings, name, default=NOT_SET):
 
     """
     if name not in DEFAULT_SETTINGS:
-        raise KeyError(f"Unknown pyramid_restler setting: {name}")
-    settings = all_settings.get("pyramid_restler", {})
+        raise KeyError(f"Unknown pyramid_resourceful setting: {name}")
+    settings = all_settings.get("pyramid_resourceful", {})
     if name in settings:
         value = settings[name]
     elif default is NOT_SET:

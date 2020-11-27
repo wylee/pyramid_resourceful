@@ -2,7 +2,7 @@
 
 To run this example, first run ``poetry install``, which will install
 the necessary development dependencies. The run the following command
-from the top level ``pyramid_restler`` directory::
+from the top level ``pyramid_resourceful`` directory::
 
     PYTHONPATH=. pserve -n sqlalchemy --reload examples/example.ini
 
@@ -18,7 +18,7 @@ and recreated.
 from pyramid.config import Configurator
 from pyramid.csrf import CookieCSRFStoragePolicy
 
-from pyramid_restler.sqlalchemy import (
+from pyramid_resourceful.sqlalchemy import (
     SQLAlchemyContainerResource,
     SQLAlchemyItemResource,
 )
@@ -79,14 +79,14 @@ def main(global_config, **settings):
 
     with config:
         config.include("pyramid_mako")
-        config.include("pyramid_restler")
+        config.include("pyramid_resourceful")
 
         config.set_csrf_storage_policy(CookieCSRFStoragePolicy())
         config.set_default_csrf_options(require_csrf=True)
 
         config.add_request_method(db_session_factory, "dbsession", reify=True)
 
-        # These are the pyramid_restler bits
+        # These are the pyramid_resourceful bits
         config.add_resource(
             ContainerResource,
             name="root",

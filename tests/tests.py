@@ -17,11 +17,11 @@ else:
     from sqlalchemy.schema import Column
     from sqlalchemy.types import Integer, String
 
-from pyramid_restler.sqlalchemy import (
+from pyramid_resourceful.sqlalchemy import (
     SQLAlchemyContainerResource,
     SQLAlchemyItemResource,
 )
-from pyramid_restler.view import ResourceView
+from pyramid_resourceful.view import ResourceView
 
 
 class DummyRequest(DummyRequest):
@@ -284,7 +284,7 @@ class TestAddResource(TestCase):
     def _make_config(self, autocommit=True):
         config = Configurator(autocommit=autocommit)
         config.add_view = self._make_add_view(config)
-        config.include("pyramid_restler")
+        config.include("pyramid_resourceful")
         return config
 
     def _make_add_view(self, config):
@@ -325,7 +325,7 @@ class TestAddResource(TestCase):
 class TestPOSTTunneling(TestCase):
     def _make_app(self):
         config = Configurator()
-        config.include("pyramid_restler")
+        config.include("pyramid_resourceful")
         config.enable_post_tunneling()
         return config.make_wsgi_app()
 

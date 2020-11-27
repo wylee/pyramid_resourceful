@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from pyramid.request import Request
 
-from pyramid_restler.util import get_param
+from pyramid_resourceful.util import get_param
 
 
 class TestGetParam(TestCase):
