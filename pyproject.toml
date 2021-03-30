@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyramid_resourceful"
-version = "1.0a1"
+version = "1.0a3"
 description = "Resourceful routes & views for Pyramd"
 authors = ["Wyatt Baldwin <self@wyattbaldwin.com>"]
 readme = "README.rst"
@@ -38,13 +38,15 @@ black = { version = "*", allow-prereleases = true }
 coverage = "*"
 flake8 = "*"
 mypy = "*"
+pyramid_debugtoolbar = "*"
 pyramid_mako = "*"
+pyramid_tm = "*"
 runcommands = { version = "*", allow-prereleases = true }
 sphinx = "*"
 sqlalchemy = "*"
 tox = "*"
 waitress = "*"
-pyramid_debugtoolbar = "*"
+"zope.sqlalchemy" = "*"
 
 [tool.black]
 target-version = ["py36"]

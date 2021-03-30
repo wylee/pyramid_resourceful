@@ -77,9 +77,6 @@ class ResourceView:
         method = request.method
 
         if method in ("GET", "HEAD") or request.is_xhr:
-            converter = getattr(self.resource, "response_converter", None)
-            if converter:
-                data = converter(data)
             return data
 
         # Redirect after POST et al.

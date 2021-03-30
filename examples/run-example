@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+shopt -s failglob globstar
+
+PYTHONPATH=. pserve -n "${1:-sqlalchemy}" --reload examples/example.ini

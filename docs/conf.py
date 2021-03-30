@@ -6,7 +6,7 @@ top_level = os.path.dirname(here)
 # -- General configuration -----------------------------------------------------
 
 project = "pyramid_resourceful"
-version = "1.0a1"  # Short version
+version = "1.0a3"  # Short version
 release = version  # Full version
 author_name = "Wyatt Baldwin"
 author_email = "self@wyattbaldwin.com"

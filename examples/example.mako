@@ -81,14 +81,14 @@
     </table>
 
     <p>
-      <a href="${request.route_path('sqlalchemy.container.json')}">
+      <a href="${request.route_path('items.json')}">
         GET all items as JSON
       </a>
     </p>
 
     <h2>Add Item</h2>
 
-    <form method="post" action="${request.route_path('sqlalchemy.container')}">
+    <form method="post" action="${request.route_path('items')}">
       <input type="hidden" name="csrf_token" value="${get_csrf_token()}">
       <input type="text" name="title" placeholder="Title">
       <input type="text" name="description" placeholder="Description">
@@ -97,7 +97,7 @@
 
     % for item in items:
       <h2>Edit Item ${item['id']}</h2>
-      <form method="post" action="${request.route_path('sqlalchemy.item', id=item['id'])}">
+      <form method="post" action="${request.route_path('item', id=item['id'])}">
         <input type="hidden" name="$method" value="PUT">
         <input type="hidden" name="csrf_token" value="${get_csrf_token()}">
         <input type="text" name="title" value="${item['title']}" placeholder="Title">
@@ -124,15 +124,15 @@
       ${item['description']}
     </td>
     <td>
-      <a href="${request.route_path('sqlalchemy.item', id=item['id'])}"
+      <a href="${request.route_path('item', id=item['id'])}"
          class="item-get-link"
       >
-        ${request.route_path('sqlalchemy.item', id=item['id'])}
+        ${request.route_path('item', id=item['id'])}
       </a>
     </td>
     <td>
       <form method="post"
-            action="${request.route_path('sqlalchemy.item', id=item['id'])}"
+            action="${request.route_path('item', id=item['id'])}"
             class="delete-member-form"
       >
         <input type="hidden" name="$method" value="DELETE">

@@ -46,16 +46,6 @@ class Item(Base):
     value = Column(String, nullable=False)
 
 
-class ContainerResource(SQLAlchemyContainerResource):
-
-    model = Item
-
-
-class ItemResource(SQLAlchemyItemResource):
-
-    model = Item
-
-
 class TestBase(TestCase):
     def setUp(self):
         # For each test, create a new database and populate it with a few
@@ -87,7 +77,7 @@ class TestBase(TestCase):
 class TestSQLAlchemyContainerResource(TestBase):
     def make_resource(self, **request_kwargs):
         request = self.make_request(**request_kwargs)
-        return ContainerResource(request)
+        return SQLAlchemyContainerResource(request, Item)
 
     def test_create(self):
         resource = self.make_resource(
@@ -96,6 +86,7 @@ class TestSQLAlchemyContainerResource(TestBase):
             post={"value": 4},
         )
         data = resource.post()
+        self.session.commit()
         self.assertIn("item", data)
         item = data["item"]
         retrieved_item = self.session.query(Item).get(item.id)
@@ -108,6 +99,7 @@ class TestSQLAlchemyContainerResource(TestBase):
             json_body={"value": 4},
         )
         data = resource.post()
+        self.session.commit()
         self.assertIn("item", data)
         item = data["item"]
         retrieved_item = self.session.query(Item).get(item.id)
@@ -124,7 +116,7 @@ class TestSQLAlchemyContainerResource(TestBase):
 class TestSQLAlchemyItemResource(TestBase):
     def make_resource(self, **request_kwargs):
         request = self.make_request(**request_kwargs)
-        return ItemResource(request)
+        return SQLAlchemyItemResource(request, Item)
 
     def test_get(self):
         resource = self.make_resource(matchdict={"id": "1"})
@@ -148,6 +140,7 @@ class TestSQLAlchemyItemResource(TestBase):
             matchdict={"id": "1"},
         )
         data = resource.patch()
+        self.session.commit()
         self.assertIn("item", data)
         item = data["item"]
         self.assertEqual("ONE", item.value)
@@ -166,14 +159,19 @@ class TestSQLAlchemyItemResource(TestBase):
         self.assertIsNotNone(item)
         resource = self.make_resource(method="DELETE", matchdict={"id": "1"})
         resource.delete()
+        self.session.commit()
         item = self.session.query(Item).get(1)
         self.assertIsNone(item)
 
 
 class TestContainerResourceView(TestBase):
+    def make_view(self, request):
+        resource = SQLAlchemyContainerResource(request, Item)
+        return ResourceView(resource, request)
+
     def test_get(self):
         request = self.make_request(path="/things")
-        view = ResourceView(ContainerResource(request), request)
+        view = self.make_view(request)
         data = view.get()
         self.assertEqual(request.response.status_code, 200)
         self.assertIn("items", data)
@@ -188,8 +186,9 @@ class TestContainerResourceView(TestBase):
             content_type="application/x-www-form-urlencoded",
             post={"value": "four"},
         )
-        view = ResourceView(ContainerResource(request), request)
+        view = self.make_view(request)
         data = view.post()
+        self.session.commit()
         self.assertEqual(request.response.status_code, 200)
         self.assertIn("item", data)
         item = data["item"]
@@ -203,8 +202,9 @@ class TestContainerResourceView(TestBase):
             content_type="application/json",
             json_body={"value": "four"},
         )
-        view = ResourceView(ContainerResource(request), request)
+        view = self.make_view(request)
         data = view.post()
+        self.session.commit()
         self.assertEqual(request.response.status_code, 200)
         self.assertIn("item", data)
         item = data["item"]
@@ -213,9 +213,13 @@ class TestContainerResourceView(TestBase):
 
 
 class TestItemResourceView(TestBase):
+    def make_view(self, request):
+        resource = SQLAlchemyItemResource(request, Item)
+        return ResourceView(resource, request)
+
     def test_get(self):
         request = self.make_request(path="/thing/1.json", matchdict={"id": "1"})
-        view = ResourceView(ItemResource(request), request)
+        view = self.make_view(request)
         data = view.get()
         self.assertEqual(request.response.status_code, 200)
         self.assertIn("item", data)
@@ -225,7 +229,7 @@ class TestItemResourceView(TestBase):
 
     def test_get_nonexistent(self):
         request = self.make_request(path="/thing/42.json", matchdict={"id": "42"})
-        view = ResourceView(ItemResource(request), request)
+        view = self.make_view(request)
         self.assertRaises(HTTPNotFound, view.get)
 
     def test_put(self):
@@ -236,8 +240,9 @@ class TestItemResourceView(TestBase):
             post={"value": "ONE"},
             content_type="application/x-www-form-urlencoded",
         )
-        view = ResourceView(ItemResource(request), request)
+        view = self.make_view(request)
         data = view.put()
+        self.session.commit()
         self.assertEqual(request.response.status_code, 200)
         self.assertIn("item", data)
         item = data["item"]
@@ -252,8 +257,9 @@ class TestItemResourceView(TestBase):
             post={"id": "42", "value": "42"},
             content_type="application/x-www-form-urlencoded",
         )
-        view = ResourceView(ItemResource(request), request)
+        view = self.make_view(request)
         data = view.put()
+        self.session.commit()
         self.assertEqual(request.response.status_code, 200)
         self.assertIn("item", data)
         item = data["item"]
@@ -264,8 +270,9 @@ class TestItemResourceView(TestBase):
         request = self.make_request(
             method="DELETE", path="/thing/1", matchdict={"id": "1"}
         )
-        view = ResourceView(ItemResource(request), request)
+        view = self.make_view(request)
         data = view.delete()
+        self.session.commit()
         self.assertEqual(request.response.status_code, 200)
         self.assertIn("item", data)
         item = data["item"]
@@ -276,11 +283,11 @@ class TestItemResourceView(TestBase):
         request = self.make_request(
             method="DELETE", path="/thing/42", matchdict={"id": "42"}
         )
-        view = ResourceView(ItemResource(request), request)
+        view = self.make_view(request)
         self.assertRaises(HTTPNotFound, view.delete)
 
 
-class TestAddResource(TestCase):
+class TestAddResources(TestCase):
     def _make_config(self, autocommit=True):
         config = Configurator(autocommit=autocommit)
         config.add_view = self._make_add_view(config)
@@ -313,13 +320,87 @@ class TestAddResource(TestCase):
 
     def test_add_container_resource(self):
         config = self._make_config()
-        config.add_resource(ContainerResource)
+        config.add_resource(
+            SQLAlchemyContainerResource,
+            resource_args={
+                "model": Item,
+            },
+        )
         self.assertEqual(12, config.add_view.count)
 
     def test_add_item_resource(self):
         config = self._make_config()
-        config.add_resource(ItemResource)
+        config.add_resource(
+            SQLAlchemyItemResource,
+            resource_args={
+                "model": Item,
+            },
+        )
         self.assertEqual(12, config.add_view.count)
+
+    def test_add_resources(self):
+        config = self._make_config()
+        resource_args = {"model": Item}
+        with config.add_resources(
+            "api",
+            resource_args=resource_args,
+            permission="admin",
+        ) as add_resource:
+            info = add_resource(SQLAlchemyContainerResource, name="items")
+            self.assertEqual(info.name, "api.items")
+            self.assertEqual(info.path, "/api/items")
+            info = add_resource(SQLAlchemyItemResource, name="item", segments="{id}")
+            self.assertEqual(info.name, "api.item")
+            self.assertEqual(info.path, "/api/item/{id}")
+        self.assertEqual(24, config.add_view.count)
+
+    def test_nested_add_resources(self):
+        config = self._make_config()
+        a_resource_args = {"model": Item, "filter_converters": {"a": "a"}}
+        b_resource_args = {"filter_converters": {"b": "b"}}
+        c_resource_args = {"filter_converters": {"a": 1, "b": 2, "c": 3}}
+        with config.add_resources("a", resource_args=a_resource_args) as a:
+            info = a(SQLAlchemyContainerResource, name="")
+            self.assertEqual(info.name, "a")
+            self.assertEqual(info.path, "/a")
+            self.assertEqual(
+                info.resource_args,
+                {
+                    "model": Item,
+                    "filter_converters": {
+                        "a": "a",
+                    },
+                },
+            )
+            with a.add_resources("b", resource_args=b_resource_args) as b:
+                info = b(SQLAlchemyContainerResource, name="c")
+                self.assertEqual(info.name, "a.b.c")
+                self.assertEqual(info.path, "/a/b/c")
+                self.assertEqual(
+                    info.resource_args,
+                    {
+                        "model": Item,
+                        "filter_converters": {
+                            "a": "a",
+                            "b": "b",
+                        },
+                    },
+                )
+                with b.add_resources("c", resource_args=c_resource_args) as c:
+                    info = c(SQLAlchemyContainerResource, name="d")
+                    self.assertEqual(info.name, "a.b.c.d")
+                    self.assertEqual(info.path, "/a/b/c/d")
+                    self.assertEqual(
+                        info.resource_args,
+                        {
+                            "model": Item,
+                            "filter_converters": {
+                                "a": 1,
+                                "b": 2,
+                                "c": 3,
+                            },
+                        },
+                    )
 
 
 class TestPOSTTunneling(TestCase):

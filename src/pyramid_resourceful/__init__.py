@@ -9,6 +9,9 @@ __all__ = [
 ]
 
 
+__version__ = "1.0a2"
+
+
 def includeme(config):
     for name in config_module.__all__:
         method = getattr(config_module, name)

@@ -1,5 +1,5 @@
 pyramid_resourceful
-+++++++++++++++
++++++++++++++++++++
 
 Overview
 ========
@@ -8,43 +8,113 @@ Overview
 resourceful Web services and applications on top of the Pyramid
 framework.
 
+Resources
+=========
+
+Resources focus on the data/logic of your business domain. They are
+implemented as classes with methods like ``get``, ``post``, etc
+corresponding to HTTP methods. They must also have an ``__init__``
+method that accepts the current request as the first argument.
+
+Here's a basic example::
+
+    # A mock "database"
+    ITEMS = [
+        {"id": 1, "name": "one"},
+        {"id": 2, "name": "two"},
+    ]
+
+    class ContainerResource:
+        def __init__(self, request):
+            self.request = request
+
+        def get(self):
+            """Get all items."""
+            return ITEMS
+
+        def post(self):
+            """Add a new item."""
+            ITEMS.append({
+                "id": max(item["id"] for item in ITEMS) + 1,
+                "name": self.request.POST["name"],
+            })
+            return ITEMS
+
+
+    class ItemResource:
+        def __init__(self, request):
+            self.request = request
+
+        def get(self):
+            """Get item."""
+            return ITEMS[self.request.matchdict["id"]]
+
+        def put(self):
+            """Update item."""
+            item = ITEMS[self.request.matchdict["id"]]
+            item["name"] = self.request.POST["name"]
+            return item
+
 Routes
 ======
 
-A Pyramid configuration directive is provided that makes generating the
-various routes and views for a resource easy::
+A Pyramid configuration directive is provided that generates all the
+routes and views for a resource::
 
-    config.add_resource(ThingsResource, "things")
+    config.add_resource(ContainerResource, name="items")
+    config.add_resource(ItemResource, name="item", segments="{id}")
 
- This will generate a set of routes and views for the resource:
+This will configure the following routes and views, which will return
+JSON by default:
 
-    HTTP method => view method => resource method
+=========== ========== ========== =========== ========================
+HTTP Method Route Name Route Path View Method Resource Method
+=========== ========== ========== =========== ========================
+GET         items      /items     get()       ContainerResource.get()
+POST        items      /items     post()      ContainerResource.post()
+GET         item       /item/{id} get()       ItemResource.get()
+PUT         item       /item/{id} put()       ItemResource.put()
+=========== ========== ========== =========== ========================
 
-    DELETE /things => delete() => delete()
-    GET /things => get() => get()
-    PATCH /things =>  patch() => patch()
-    POST /things =>  post() => post()
-    PUT /things => put() => put()
+Note that only the methods that are present on the resource are routed.
+
+To render HTML or JSON depending on what the request accepts::
+
+    config.add_resource(
+        ContainerResource,
+        name="items",
+        renderers=["items.jinja2", "json"],
+    )
+
+The HTML version of the resource can be retrieved using the URLs
+``/items`` and ``/items.html``. The JSON version can be retrieved using
+the URL ``/items.json`` *or* ``/items`` with the ``Accept`` header set
+to ``application/json``.
+
 
 Views
 =====
 
-Resource views are implemented as a standard set of HTTP methods in view
-classes. See :class:`pyramid_resourceful.view.ResourceView` as an example.
+Views focus on the web aspects of interacting with a resource. They
+don't contain any business logic. Like resources, views are implemented
+as classes with methods like ``get``, ``post``, etc corresponding to
+HTTP methods.
 
-Resources
-=========
+In a typical scenario, you'll only need to define your resource classes
+and ``pyramid_resourceful`` will handle the view layer for you in a
+standard way (see :class:`pyramid_resourceful.view.ResourceView`).
 
-Resource views interact with a resource. A common example of such a
-resource is a database table that's mapped to a SQLAlchemy ORM class.
+SQLAlchemy
+==========
 
 :class:`pyramid_resourceful.sqlalchemy.SQLAlchemyContainerResource` and
-:class:`pyramid_resourceful.sqlalchemy.SQLAlchemyItemResource` classes are
-provided as a starting point.
+:class:`pyramid_resourceful.sqlalchemy.SQLAlchemyItemResource` are
+provided as a starting point for building database-backed resources
+using SQLAlchemy ORM classes.
 
-The purpose of the resource layer is to provide a uniform interface to
-any kind of resource. This way, the view layer can be written in a
-generic manner.
+See `examples/sqlalchemy.py`_ for a self-contained, runnable example.
+
+.. _examples/sqlalchemy.py: https://github.com/wylee/pyramid_resourceful/blob/dev/examples/sqlalchemy.py
 
 More Info
 =========
