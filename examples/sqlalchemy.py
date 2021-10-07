@@ -59,13 +59,6 @@ class Item(Base):
         return f"Item(id={self.id}, title={self.title}, description={self.description})"
 
 
-def root_view(request):
-    items = request.dbsession.query(Item).all()
-    return {
-        "items": items,
-        "model": Item,
-    }
-
 
 def main(global_config, **settings):
     def get_request_session(request):
