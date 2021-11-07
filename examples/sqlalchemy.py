@@ -84,7 +84,11 @@ def main(global_config, **settings):
         config.add_request_method(get_request_session, "dbsession", reify=True)
 
         # These are the pyramid_resourceful bits
+
+        # Resource args are passed in when creating a resource.
         resource_args = {"model": Item}
+
+        # Expose the root URL (AKA home page) as HTML only.
         config.add_resource(
             SQLAlchemyContainerResource,
             resource_args=resource_args,
@@ -92,10 +96,14 @@ def main(global_config, **settings):
             path="/",
             renderers=["example.mako"],
         )
+
+        # Expose the API endpoints as JSON. Also expose the items
+        # endpoint as HTML (as the home page of the item API).
         with config.add_resources(
             path_prefix="/items/",
             resource_args=resource_args,
         ) as add_resource:
+            # Items endpoint: list and create items (GET, POST).
             add_resource(
                 SQLAlchemyContainerResource,
                 resource_args=resource_args,
@@ -103,12 +111,19 @@ def main(global_config, **settings):
                 path="",
                 renderers=["json", "example.mako"],
             )
+
+            # Item endpoint: show, update, and delete individual items`
+            # (GET, PATCH, PUT, DELETE). Note that PUT can also be used
+            # to create a new item.
             add_resource(
                 SQLAlchemyItemResource,
                 resource_args=resource_args,
                 name="item",
                 path=r"{id:\d+}",
             )
+
+        # This allows DELETE, PATCH, and PUT to be tunneled over POST
+        # when using HTML forms.
         config.enable_post_tunneling()
 
     return config.make_wsgi_app()
