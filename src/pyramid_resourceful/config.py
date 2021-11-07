@@ -132,7 +132,7 @@ def add_resource(
 
             - If the class name ends with "Resource", that's stripped
               off
-            - The class name is then converted to camel case
+            - The class name is then converted to snake case
             - The module name containing the class is joined to the
               converted class name with a dot
 
